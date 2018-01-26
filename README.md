@@ -13,8 +13,17 @@ To start a new project by cloning this repository:
 
 ```
 git clone https://github.com/ryanabest/barebones
+```
+
+Once you rename the 'barebones' folder to your project name, cd to that folder then run:
+
+```
 npm install
 npm run dev
 ```
 
 This final command will open a server in your browser that hosts your project (available at localhost:3000). Your browser will now watch for any changes you make and automatically incorporate these changes once they are saved.
+
+## Next Additions
+
+* [Cookiecutter](https://github.com/audreyr/cookiecutter) to add some naming convention automation.

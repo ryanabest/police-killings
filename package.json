@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "bareones project starter dev environment using BrowserSync and Gulp",
   "main": "index.js",
-  "repository": "ryanabest/barebones",
+  "repository": "https://github.com/ryanabest/barebones",
   "scripts": {
     "dev": "gulp watch",
     "bs": "browser-sync start --server --files '*.html, css/*.css'"

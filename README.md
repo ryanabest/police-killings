@@ -12,7 +12,7 @@ barebones is a static project starter built from the ground up. My goal is to on
 To start a new project by cloning this repository:
 
 ```
-git clone https://github.com/ryanabest/barebones
+git clone 'https://github.com/ryanabest/barebones'
 ```
 
 Once you rename the 'barebones' folder to your project name, cd to that folder then run:

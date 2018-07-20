@@ -1,4 +1,4 @@
-# barebones
+<!-- # barebones
 
 barebones is a static project starter built from the ground up. My goal is to only include the packages and functionality I need, when I need it.
 
@@ -35,4 +35,4 @@ This final command will open a server in your browser that hosts your project (a
 
 ## Next Additions
 
-* [Cookiecutter](https://github.com/audreyr/cookiecutter) to add some naming convention automation.
+* [Cookiecutter](https://github.com/audreyr/cookiecutter) to add some naming convention automation. -->

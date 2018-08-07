@@ -159,6 +159,8 @@ mappingFull = mappingFull.loc[mappingFull["race"] != "Unknown Race"]
 ### Police Violence ###
 stateYearSumm = mappingFull.groupby(['state','year'])['name'].agg('count').reset_index()
 stateYearSumm.rename(columns={"name": "n"},inplace=True)
+stateRaceSumm = mappingFull.groupby(['race','state'])['name'].agg('count').reset_index()
+stateRaceSumm.rename(columns={"name": "n"},inplace=True)
 stateRaceYearSumm = mappingFull.groupby(['state','year','race'])['name'].agg('count').reset_index()
 stateRaceYearSumm.rename(columns={"name": "n"},inplace=True)
 
@@ -169,6 +171,8 @@ stateRaceYearSumm['share_of_deaths'] = stateRaceYearSumm["race_deaths"]/stateRac
 
 countryYearSumm = mappingFull.groupby(['year'])['name'].agg('count').reset_index()
 countryYearSumm.rename(columns={"name": "n"},inplace=True)
+countryRaceSumm = mappingFull.groupby(['race'])['name'].agg('count').reset_index()
+countryRaceSumm.rename(columns={"name": "n"},inplace=True)
 countryRaceYearSumm = mappingFull.groupby(['year','race'])['name'].agg('count').reset_index()
 countryRaceYearSumm.rename(columns={"name": "n"},inplace=True)
 
@@ -202,6 +206,20 @@ censusStateRaceYear["share_of_population"] = censusStateRaceYear["race_populatio
 # Combination with Police Data summary #
 stateRaceYearSumm = pd.merge(stateRaceYearSumm,censusStateRaceYear,on=['year','race','state'],how="left")
 stateRaceYearSumm['multiplier'] = stateRaceYearSumm['share_of_deaths']/stateRaceYearSumm['share_of_population']
+stateYearSumm = pd.merge(stateYearSumm,censusStateYear,on=['year','state'],how="left")
+stateYearSumm['deaths_per_pop'] = stateYearSumm['n']/stateYearSumm['population']
+stateYearSumm['deaths_per_thousand'] = stateYearSumm['deaths_per_pop'] * 1000
+stateYearSumm['deaths_per_million']  = stateYearSumm['deaths_per_thousand'] * 1000
+
+censusStateRace = censusStateRaceYear.groupby(['race','state','state_full'])['race_population','state_population'].sum().reset_index()
+censusStateRace["share_of_population"] = censusStateRace["race_population"]/censusStateRace["state_population"]
+
+# print(censusStateRace.loc[censusStateRace['state']=='MI',:])
+stateRaceSumm = pd.merge(stateRaceSumm,censusStateRace,on=['race','state'],how='outer')
+stateRaceSumm["n"].fillna(0, inplace=True)
+stateRaceSumm["state_n"] = stateRaceSumm["n"].groupby(stateRaceSumm["state"]).transform('sum')
+stateRaceSumm["share_of_deaths"] = stateRaceSumm["n"]/stateRaceSumm["state_n"]
+stateRaceSumm['multiplier'] = stateRaceSumm['share_of_deaths']/stateRaceSumm['share_of_population']
 
 ## Country - Year ##
 censusCountryRaceYear = pd.melt(censusCountryPivot, id_vars=['race'],value_vars=['POPESTIMATE2013','POPESTIMATE2014','POPESTIMATE2015','POPESTIMATE2016','POPESTIMATE2017','POPESTIMATE2018'],
@@ -218,19 +236,30 @@ countryRaceYearSumm = pd.merge(countryRaceYearSumm,censusCountryRaceYear,on=['ye
 countryRaceYearSumm['multiplier'] = countryRaceYearSumm['share_of_deaths']/countryRaceYearSumm['share_of_population']
 countryYearSumm = pd.merge(countryYearSumm,censusCountryYear,on=['year'],how="left")
 countryYearSumm['deaths_per_pop'] = countryYearSumm['n']/countryYearSumm['population']
+countryYearSumm['deaths_per_thousand'] = countryYearSumm['deaths_per_pop'] * 1000
+countryYearSumm['deaths_per_million'] = countryYearSumm['deaths_per_thousand'] * 1000
 
 ## Country ##
-countryRaceSumm = mappingFull.groupby(['race'])['name'].agg('count').reset_index()
-countryRaceSumm.rename(columns={"name": "n"},inplace=True)
 countryRaceSumm["country_n"] = countryRaceSumm["n"].sum()
 countryRaceSumm["share_of_deaths"] = countryRaceSumm["n"]/countryRaceSumm["country_n"]
 
 censusCountryRace = censusCountryRaceYear.groupby(['race'])['race_population'].sum().reset_index()
 censusCountryRace["country_population"] = censusCountryRaceYear['race_population'].sum()
 censusCountryRace["share_of_population"] = censusCountryRace["race_population"]/censusCountryRace["country_population"]
-censusCountryRace = censusCountryRace[["race","share_of_population"]]
+
 
 countryRaceSumm = pd.merge(countryRaceSumm,censusCountryRace,on=['race'],how="left")
 countryRaceSumm['multiplier'] = countryRaceSumm['share_of_deaths']/countryRaceSumm['share_of_population']
 
+stateRaceSumm.to_json(os.path.join(base_dir,'assets','stateRaceSumm.json'))
+stateYearSumm.to_json(os.path.join(base_dir,'assets','stateYearSumm.json'))
+stateRaceYearSumm.to_json(os.path.join(base_dir,'assets','stateRaceYearSumm.json'))
+
 countryRaceSumm.to_json(os.path.join(base_dir,'assets','countryRaceSumm.json'))
+countryYearSumm.to_json(os.path.join(base_dir,'assets','countryYearSumm.json'))
+countryRaceYearSumm.to_json(os.path.join(base_dir,'assets','countryRaceYearSumm.json'))
+
+mappingFull.to_json(os.path.join(base_dir,'assets','mappingFull.json'))
+censusFull.to_json(os.path.join(base_dir,'assets','censusFull.json'))
+
+# print(mappingFull['month'].value_counts())
